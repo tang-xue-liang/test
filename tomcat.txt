@@ -1,0 +1,348 @@
+ Tomcat:web服务器软件
+	1.下载:
+	2.安装:解压压缩包即可.
+		*注意:安装目录建议不要有中文空格和空格
+	3.卸载:删除即可
+	文件的分布格式
+	
+	4.配置:
+		*部署项目的方式:
+			1.直接将项目放置于,server.xml
+			<Context docBase="D:\hello" path="/hehe" />
+		:这种需要重启服务器才会生效;
+		*在localhost任意创建名称的xml文件,虚拟目录为:xml的文件名称
+		
+	*静态项目和动态目录:
+		*目录结构:
+			*java动态项目的目录结构:
+				--项目的根目录:
+					--web-INF目录:
+						--web.xml:web项目的核心配置文件
+						--classes目录:放置字节码文件的目录
+						--lib目录:放置依赖的jar包
+	#将Tomcat集成到eclipse中,并创建JavaEE的项目,部署项目.
+	
+	
+	配置servlet步骤:
+	<servlet>
+        <servlet-name>demo01</servlet-name>
+        <servlet-class>cn.txl.web.Demo01</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>demo01</servlet-name>
+        <url-pattern>/demo01</url-pattern>
+    </servlet-mapping>
+	##执行原理:
+		1.当服务器接收到客户端浏览器的请求后,会解析请求url路径,获取访问的Servlet的资源链接
+		2.查找web.xml文件,是否有对应的<url-pattern>标签体内容
+		3.如果有,则在找到对应的<servlet-classes>全类名
+		4.tomcat会将字节码文件加载进内存,并且创建其对象
+		5.调用其方法 
+	
+	#Servlet中的生命周期方法:
+		1.被创建:执行init方法,只执行一次
+			*Servlet什么时候被创建?
+				*默认情况下,第一次被创建的时候被执行
+			#可以配置执行servlet的创建时候
+				1.第一次被访问的时候,创建
+					*<load-on-startup>的值为负数
+				2.在服务器启动时,创建
+					*<load-on-startup>的值为0或者为正整数
+			*servlet的init方法,只执行一次,说明一个serlvet在内存只存在一个对象,servlet是单例的
+		2.提供服务:执行service方法,执行多洗
+		3.被销毁:执行destroy方法,只执行一次
+		
+		
+	*Servlet3.0
+	
+	
+##今日内容:
+	1.servlet:
+	2.http协议
+	3.request
+
+#Servlet:
+	体系结构:Servlet--接口
+		|
+	GenericServlet --抽象类
+		|
+	HTTPServlet  --抽象类
+	
+	##Servlet相关配置
+		1.urlpartten:servlet访问路径:@WebServlet({"/a","/d","/c"})
+		2.路径定义规则
+			1./xxx
+			2./xxx/xxx
+			3.*.do
+		
+##HTTP:
+	*概念:超文本传输协议
+		*传输协议:定义了客户端和服务端通信时,发送数据的格式
+		*特点:1.基于TCP/IP的高级协议
+		2.默认端口号:80
+		3.基于请求/响应模型的,一次请求对应一次响应
+		4.无状态:每次请求相互独立,不能交互数据
+	*历史版本:
+		*1.0:每一行请求响应都会建立新的连接
+		*1.1:复用连接
+##请求消息数据格式
+	1.请求行
+		请求方式 请求url 请求协议/版本
+		GET /login.html HTTP/1.1
+		请求方式:
+			1.GET:
+				1.请求参数在请求行中,在url后.
+				2.请求的url长度是有限制的
+				3.不太安全
+			2.POST:
+				1.请求参数在请求体
+				2.请求的url长度没有限制的
+				3.相对安全
+		
+	2.请求头
+		键值对;
+		*常见的请求头:
+			1.User-agent:浏览器告诉服务器,我访问你使用的浏览器版本
+				*可以在服务器获取该头的信息,解决浏览器兼容的问题
+			2.Referer:http://localhost/tang1.html
+				*告诉服务器我从哪里来
+					*作用:1.防盗链,2.统计工作:
+	3.请求空行	
+	4.请求体:post方式才会有
+	
+
+##Request:
+	1.request对象和response对象的原理
+		1.request对象和response对象是由服务器创建.我们来使用它
+		2.request对象是来获取请求消息,response对象是来获取响应消息的
+	
+	2.request对象继承体系结构:
+		ServletRequest  --接口
+			|继承
+		HTTPServletRequest --接口
+			|实现
+		org.apache.catalina.connector.RequestFacade 类
+		
+	3.request功能:
+		1.获取请求消息数据
+			1.获取请求行数据
+				*方法:
+					获取请求方法
+					*String getMethod() GET
+					获取虚拟目录:
+					*String getContextpath() day01_Servlet_war_exploded
+					获取Servlet路径:a/b
+					*String getServlet()
+					获取get方式请求参数:name=zhangsan
+					获取请求URI:http://localhost:8080/day01_Servlet_war_exploded/a/b
+						*String getRequestURI()
+						*StringBuffer getRequest()
+					获取协议及版本:
+						*String getProtocol()
+					获取客户机的IP地址:
+						*String getRemoteAddr()
+	
+	4.获取请求体数据:
+		*请求体:只有POST才有请求体,在请求体中封装了POST的请求参数
+		*步骤:
+			1.获取流对象
+				*BufferedReader getReader():获取字符输入流,只能操作字符数据
+				*ServletInputStream getInputStream():获取字节输入流,可以操作所有的类型的数据
+					*在文件上传知识点后讲解
+			2.再从流对象中获取数据
+			
+	5.其他功能:
+		1.获取请求参数通用方式
+			1.String getParameter(String name) :根据参数名称获取参数值 username=汤学良&password=123
+			2.String[] getParameterValues(String name):根据参数名称获取参数值得数组 hobby=xx&hobby=game
+			3.Enumeration<String> getParameternames():获取所有请求参数名称
+			4.Map<String,String[]>getParameterMap():获取所有参数的map集合
+			
+			*中文乱码问题:
+				*get方式:tomcat8 已经将get方式乱码问题解决了
+				*post方式:会乱码
+					*解决:在获取参数之前,设置request的编码request.setCharacterEncoding("utf-8");
+					
+					
+		2.请求转发:一种在服务器内部的资源跳转方式
+			1.步骤:
+				1.通过request对象获取请求转发器对象;RequestDispatcher(String path),不需要虚拟目录
+				2.使用其对象来进行转发:forword(Servlet Request,ServletResponse response);
+			2.特点:
+				1.浏览器地址栏路径没有发生变化
+				2.只能转发到当前服务器内部资源
+				3.转发是一次请求
+	
+		3.共享数据
+			*域对象:一个有作用的对象,可以在范围内共享数据
+			*request域:代表一次请求的范围,一般用于请求转发的多个资源中共享数据
+			*方法:
+				1.void setAttribute(String name,Object obj):储存数据
+				2.Object getAttritude(String name):通过键获取值
+				3.void removeAttribute(String name):通过键移除键值对
+						
+		4.获取ServletContext 
+
+##今日内容
+	
+	1.HTTP协议:响应消息
+	2.response对象
+	3.ServletContext对象
+
+##HTTP协议:
+	1.请求消息:客户端发送给服务端的数据
+			*数据格式:
+			1.请求行
+			2.请求头
+			3.请求空行
+			4.请求体
+	2.响应消息:服务端发送给客户端的数据
+		*数据格式:
+			1.响应行
+				1.组成:协议/版本 响应状态码 状态描述
+				2.响应状态码:服务器告诉客户浏览器版本次版本和响应的一个状态
+					1.状态码都是3位数
+					2.分类:
+						1.1xx:服务器接收客户端消息,但还没完成,等待一段消息后,发送1xx码
+						2.2xx:成功.代表:200
+						3.3xx:重定向.代表:302(重定向),304访问缓存
+						4.4xx:客户端错误  
+							404:客户端错误,请求路径没有资源
+							405:客户端错误,405 请求方式没有对应的doxxx方法
+						5.5xx:服务端错误
+							*505 服务器内部出
+			2.响应头
+				1.格式:头名称 : 值
+				2.响应头:
+					1.Content-Type:服务器告诉客户端浏览器本次响应体数据格式以及编码格式
+					2.Context-disposition:服务器告诉客户端以什么方式打开响应数据
+						#值:
+							*in-line:默认值,在当前界面打开
+							*attachement;filename=xxx
+			3.响应空行
+			
+			4.响应体
+	
+##Response对象
+	*功能:设置响应消息
+		1.设置响应行
+			1.格式:HTtP/1.1 200 ok
+			2.设置状态码:setStatus(int sc)
+		2.设置响应头
+			1.setHeader(String name,String value)
+		3.设置响应体
+			*设置响应体:
+				*使用步骤
+					1.获取输出流
+						*字符输出流	getWriter()
+						*字节输出流	getOutputStream
+					2.使用输出流,将数据传输到客户浏览器
+		
+		*案例:
+			1.完成重定向
+				*重定向:资源跳转的方式
+				*代码实现:
+					//1.设置状态码为302
+					response.setStatus(302)
+					//2.设置响应头location
+					response.setheader("location","/虚拟目录/虚拟路径")
+					//简单的重定向方法
+					response.sendRedirect("/虚拟目录/虚拟路径")
+				
+				*重定向的特点
+					1.地址栏发生变化
+					2.重定向可以访问其他站点(服务器的资源)
+					3.重定向是俩次请求,不可以用request对象来共享数据
+				*转发的特点:
+					1.转发地址栏路径不变
+					2.转发只能访问当前服务器下的资源
+					3.转发是一次请求,可以用request对象来共享数据
+				*路径的写法
+			2.服务器输出字符数据到浏览器
+			3.服务器输出字节流到浏览器
+		
+##路径的写法:
+	1.路径分类
+		1.相对路径:通过相对路径不可以确定唯一路径
+			*如:./index.html
+			*不以/开头,以.开头路径
+			
+			#规则:找到当前资源和目标资源之间的相对位置㽑
+			*./:当前目录
+			*../:后退一级目录
+			
+		2.绝对路径:通过绝对路径可以确定唯一资源
+			*如:http://localhost/day15/responseDemo2 
+			*以/开头的路径
+			
+			*规则:判断定义的路径是给谁用的?判断的请求从哪发出
+				*给客户端浏览器使用的:需要添加虚拟目录(项目的访问路径)
+					*建议虚拟目录动态获取:request.getContextpath()
+					*<a>,<form> 重定向,都是给客户端使用的
+				*给服务器使用:不需要添加虚拟目录
+				
+		
+		
+	2.服务器输出字符流到浏览器
+		*步骤:
+			1.获取字符输出流
+			2.输出数据
+		*注意
+			*乱码问题
+			1.PrintWriter pw=response.getWriter();获取的流默认的是ISO-8859-1
+			2.设置该流的默认编码
+			3.告诉浏览器响应体使用的编码
+			
+		//简单的形式,设置编码,是在获取流之间的设置
+		response.setContentType("text/html;chartset=utf-8");
+		
+##ServletContent对象:
+	1.概念:代表整个web应用,可以和程序的容器(服务器)来通信
+	2.获取:
+		1.通过request对象获取
+		2.通过HttpServlet获取
+			this.getServletContent()
+	3.功能:
+		1.获取MIME类型:在互联网通信过程中定义的一种文件数据类型
+			*格式:	大类型/小类型 text/html image/jpeg
+			*获取:String getMimeType()
+		2.域对象:共享数据
+			1.setAttribute(String name,Object value)
+			2.getAttribute(String name)
+			3.removeAttribute(String name)
+			
+			对象范围:所有用户请求的数据
+		3.获取文件的真实(服务器)路径
+
+#案例:
+	#文件下载要求:
+		1.定义界面,编辑超链接href属性,指向Servlet,传递资源名称filename
+		2.点击超链接后弹出下载提示框
+		3.完成图片文件下载
+	*分析:
+		1.超链接指向的资源如果能够被浏览器解析,则在浏览器中展示,如果不能解析,则弹出下载框提示,不满足需求
+		2.任何资源都必须弹出下载提示框
+		3.使用响应头设置资源的打开方式:
+			*Content-disposition:attachment;filename-xxx
+	*步骤:
+		1.定义页面,编辑超链接href属性,指向Servlet,传递资源名称filename
+		2.定义Servlet
+			1.获取文件名称
+			2.使用字节输入流加载文件进内存
+			3.指定response额响应头:Content-disposition:attachment;filename-xxx
+			4.将数据写出到response的输出流
+			
+	*文件:
+		中文文件名
+		
+		
+
+		
+		
+		
+		
+		
+		
+		
+	
+		
