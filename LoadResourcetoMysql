@@ -1,0 +1,32 @@
+package ni.wo.ta;
+
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
+
+public class Utils {
+    public static String password1 =null;
+    public static String username1 =null;
+    public static String url1 =null;
+    public static void Conectio() throws IOException {
+        InputStream resourceAsStream = Utils.class.getClassLoader().getResourceAsStream("data.properties");
+        Properties properties = new Properties();
+        properties.load(resourceAsStream);
+        password1 = properties.getProperty("password");
+        username1 = properties.getProperty("username");
+        url1 = properties.getProperty("url");
+        try {
+            // 1.加载mysql驱动程序
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            // 2.获取连接对象
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
